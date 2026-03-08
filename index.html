@@ -5,127 +5,195 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ranking OPE Rehabilitación</title>
     <style>
-        body { font-family: sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; background-color: #f4f7f9; color: #333; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        button { background: #3498db; color: white; padding: 14px; border: none; border-radius: 6px; width: 100%; cursor: pointer; font-weight: bold; }
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .stat-box { background: #ebf5fb; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #d4e6f1; }
-        .stat-val { display: block; font-size: 22px; font-weight: bold; color: #2980b9; }
-        .stat-label { font-size: 12px; color: #7f8c8d; text-transform: uppercase; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; }
-        .destacado { background-color: #fff9c4; font-weight: bold; }
-        .info-header { font-size: 14px; color: #666; margin-bottom: 20px; text-align: center; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; line-height: 1.6; background-color: #f4f7f9; color: #333; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #e1e8ed; }
+        h2 { color: #2c3e50; text-align: center; margin-bottom: 30px; }
+        h3 { color: #34495e; margin-top: 0; border-bottom: 2px solid #3498db; display: inline-block; padding-bottom: 5px; margin-bottom: 15px; }
+        input { width: 100%; padding: 15px; margin: 15px 0; border: 2px solid #eee; border-radius: 10px; box-sizing: border-box; font-size: 16px; transition: 0.3s; }
+        input:focus { border-color: #3498db; outline: none; background-color: #f9fcff; }
+        button { background: #3498db; color: white; padding: 15px; border: none; border-radius: 10px; width: 100%; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.2s; }
+        button:hover { background: #2980b9; }
+        button:disabled { background: #bdc3c7; cursor: not-allowed; }
+        .success-box { background: #ebf9f2; border-left: 5px solid #27ae60; padding: 15px; margin: 20px 0; border-radius: 8px; color: #1e8449; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; }
+        .stat-box { background: #ebf5fb; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #d4e6f1; }
+        .stat-val { display: block; font-size: 24px; font-weight: bold; color: #2980b9; }
+        .stat-label { font-size: 11px; color: #7f8c8d; text-transform: uppercase; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; border-radius: 10px; overflow: hidden; }
+        th, td { padding: 12px; text-align: center; border-bottom: 1px solid #f1f1f1; font-size: 14px; }
+        th { background-color: #f8f9fa; color: #7f8c8d; text-transform: uppercase; font-size: 11px; }
+        .destacado { background-color: #fff9c4 !important; font-weight: bold; }
+        .footer { font-size: 11px; color: #95a5a6; text-align: center; margin-top: 40px; }
     </style>
 </head>
 <body>
 
     <h2>📊 Ranking OPE Rehabilitación</h2>
-    <p class="info-header">Estimación basada en la probabilidad de las notas registradas.</p>
-
-    <div class="card" id="paso1">
+    
+    <div class="card" id="seccionPaso1">
         <h3>1. Identifícate</h3>
-        <input type="text" id="dni" placeholder="DNI con asteriscos (ej: ***2176**)">
-        <button id="btnBusca" onclick="buscarDNI()">Verificar mi Nota</button>
+        <p>Introduce tu DNI/NIE tal cual aparece en la lista oficial.</p>
+        <input type="text" id="campoDni" placeholder="Ej: ***1234**" autocomplete="off">
+        <button id="btnVerificar" onclick="gestionarVerificacion()">Verificar mi Nota de Examen</button>
     </div>
 
-    <div class="card" id="paso2" style="display:none;">
-        <div id="infoPersona" style="margin-bottom:15px; font-weight:bold;"></div>
-        <h3>2. Tu Autobaremo</h3>
-        <input type="number" step="0.001" id="baremo" placeholder="Puntos méritos (ej: 32.5)">
-        <button id="btnEnviar" onclick="enviarTodo()">Calcular mi Puesto</button>
+    <div class="card" id="seccionPaso2" style="display:none;">
+        <div id="mensajeBienvenida" class="success-box"></div>
+        <h3>2. Introduce tu Autobaremo</h3>
+        <p>Usa punto para los decimales (ej: 35.25):</p>
+        <input type="number" step="0.001" id="campoBaremo" placeholder="Puntos de méritos">
+        <button id="btnGuardar" onclick="gestionarEnvio()">Calcular mi Puesto en Ranking</button>
     </div>
 
-    <div class="card" id="panelStats" style="display:none;">
-        <h3>Tu Posición Estimada</h3>
+    <div class="card" id="panelEstadisticas" style="display:none;">
+        <h3>Tu Estimación Final</h3>
         <div class="stats-grid">
             <div class="stat-box">
                 <span class="stat-label">Puesto en Web</span>
-                <span class="stat-val" id="posWeb">-</span>
+                <span class="stat-val" id="valPosWeb">-</span>
             </div>
             <div class="stat-box" style="background: #e8f8f5; border-color: #d1f2eb;">
                 <span class="stat-label">Puesto Final Est.</span>
-                <span class="stat-val" id="posEst" style="color: #16a085;">-</span>
+                <span class="stat-val" id="valPosEst" style="color: #16a085;">-</span>
             </div>
         </div>
-        <p id="msgParticipacion" style="font-size: 12px; text-align: center; margin-top: 10px; color: #7f8c8d;"></p>
+        <p id="infoParticipacion" style="font-size: 12px; text-align: center; color: #7f8c8d;"></p>
+        <button onclick="localStorage.clear(); location.reload();" style="background:none; color:#95a5a6; font-size:11px; text-decoration:underline; margin-top:10px;">Introducir otra nota / Borrar mi sesión</button>
     </div>
 
     <div class="card">
-        <h3>Ranking General</h3>
-        <table id="tablaRanking">
-            <thead><tr><th>#</th><th>DNI</th><th>Total</th></tr></thead>
-            <tbody id="cuerpoTabla"></tbody>
+        <h3>Ranking de Participantes</h3>
+        <div id="cargandoRanking" style="text-align:center; padding:20px; font-style:italic; color:#999;">Cargando datos...</div>
+        <table id="tablaContenedor" style="display:none;">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>DNI</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody id="tablaCuerpo"></tbody>
         </table>
     </div>
 
+    <div class="footer">
+        Esta herramienta calcula la probabilidad de posición basándose en la frecuencia relativa de las notas registradas frente al total de admitidos.
+    </div>
+
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyg3ZdvE_eFkx4TmDl7LO9lf47KZyK_op4ci144s9Hyq0FwbFER85kUtmAa-xM5JB_LYQ/exec";
-        let notaExamenOficial = 0;
+        const URL_API = "https://script.google.com/macros/s/AKfycbyg3ZdvE_eFkx4TmDl7LO9lf47KZyK_op4ci144s9Hyq0FwbFER85kUtmAa-xM5JB_LYQ/exec";
+        let notaExamenCache = 0;
 
-        async function buscarDNI() {
-            const dni = document.getElementById('dni').value.toUpperCase().trim();
-            const btn = document.getElementById('btnBusca');
+        async function gestionarVerificacion() {
+            const dni = document.getElementById('campoDni').value.toUpperCase().trim();
+            const btn = document.getElementById('btnVerificar');
+            if(!dni) return alert("Por favor, introduce tu DNI.");
+
             btn.disabled = true;
+            btn.innerText = "Verificando...";
+
             try {
-                const resp = await fetch(`${WEB_APP_URL}?dni_buscar=${dni}`);
-                const data = await resp.json();
-                if(data.success) {
-                    notaExamenOficial = data.notaExamen;
-                    document.getElementById('infoPersona').innerText = `Hola, ${data.nombre}. Nota examen: ${notaExamenOficial}`;
-                    document.getElementById('paso1').style.display = 'none';
-                    document.getElementById('paso2').style.display = 'block';
-                } else { alert("DNI no encontrado."); btn.disabled = false; }
-            } catch (e) { alert("Error."); btn.disabled = false; }
+                const r = await fetch(`${URL_API}?dni_buscar=${dni}`);
+                const res = await r.json();
+
+                if(res.success) {
+                    notaExamenCache = res.notaExamen;
+                    document.getElementById('mensajeBienvenida').innerHTML = `👋 Hola, <b>${res.nombre}</b>.<br>Tu nota de examen oficial es: <b>${notaExamenCache}</b>`;
+                    document.getElementById('seccionPaso1').style.display = 'none';
+                    document.getElementById('seccionPaso2').style.display = 'block';
+                } else {
+                    alert("DNI no encontrado en el listado oficial.");
+                    btn.disabled = false;
+                    btn.innerText = "Verificar mi Nota de Examen";
+                }
+            } catch (e) {
+                alert("Error de conexión. Revisa el script de Google.");
+                btn.disabled = false;
+            }
         }
 
-        async function enviarTodo() {
-            const baremo = document.getElementById('baremo').value;
-            const dni = document.getElementById('dni').value.toUpperCase().trim();
-            if(!baremo) return;
+        async function gestionarEnvio() {
+            const baremo = document.getElementById('campoBaremo').value;
+            const dni = document.getElementById('campoDni').value.toUpperCase().trim();
+            const btn = document.getElementById('btnGuardar');
+
+            if(!baremo) return alert("Introduce tu autobaremo.");
+
+            btn.disabled = true;
+            btn.innerText = "Calculando...";
+
+            // GUARDAR IDENTIDAD ANTES DEL ENVÍO
+            localStorage.setItem('ope_dni_activo', dni);
+
             try {
-                await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ dni, autobaremo: baremo, examen: notaExamenOficial })});
-                localStorage.setItem('ope_dni', dni);
-                location.reload();
-            } catch (e) { alert("Error al guardar."); }
-        }
-
-        async function cargarRanking() {
-            try {
-                const resp = await fetch(WEB_APP_URL);
-                const obj = await resp.json();
-                const data = obj.ranking;
-                const N_total = obj.totalN;
-                const miDni = localStorage.getItem('ope_dni');
-                const cuerpo = document.getElementById('cuerpoTabla');
-
-                data.sort((a, b) => b.total - a.total);
-
-                data.forEach((user, index) => {
-                    const fila = cuerpo.insertRow();
-                    const puestoActual = index + 1;
-                    if(user.dni === miDni) {
-                        fila.className = 'destacado';
-                        // CÁLCULO MATEMÁTICO DE POSICIÓN ESTIMADA
-                        const n_participantes = data.length;
-                        let puestoEstimado = 1;
-                        if (n_participantes > 1) {
-                            puestoEstimado = 1 + (N_total - 1) * (puestoActual - 1) / (n_participantes - 1);
-                        }
-                        
-                        document.getElementById('panelStats').style.display = 'block';
-                        document.getElementById('posWeb').innerText = `${puestoActual}º / ${n_participantes}`;
-                        document.getElementById('posEst').innerText = `~${Math.round(puestoEstimado)}º`;
-                        document.getElementById('msgParticipacion').innerText = `Participación actual: ${Math.round((n_participantes/N_total)*100)}% de ${N_total} aprobados.`;
-                    }
-                    fila.insertCell(0).innerText = puestoActual;
-                    fila.insertCell(1).innerText = user.dni;
-                    fila.insertCell(2).innerText = user.total.toFixed(3);
+                await fetch(URL_API, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify({ 
+                        dni: dni, 
+                        autobaremo: baremo, 
+                        examen: notaExamenCache 
+                    })
                 });
-            } catch (e) { console.log(e); }
+                
+                // Espera un segundo para que Google Sheets procese y recarga
+                setTimeout(() => { location.reload(); }, 1200);
+            } catch (e) {
+                alert("Error al guardar los datos.");
+                btn.disabled = false;
+            }
         }
-        cargarRanking();
+
+        async function renderizarRanking() {
+            try {
+                const r = await fetch(URL_API);
+                const obj = await r.json();
+                const lista = obj.ranking;
+                const N = obj.totalN;
+                const miDniStored = localStorage.getItem('ope_dni_activo');
+                const tbody = document.getElementById('tablaCuerpo');
+
+                // Ordenar por nota total descendente
+                lista.sort((a, b) => b.total - a.total);
+
+                lista.forEach((user, i) => {
+                    const row = tbody.insertRow();
+                    const puesto = i + 1;
+                    const esMiFila = (user.dni === miDniStored);
+                    
+                    if(esMiFila) {
+                        row.className = 'destacado';
+                        const n_participantes = lista.length;
+                        
+                        // FÓRMULA DE PROBABILIDAD EMPÍRICA (Puesto Estimado)
+                        let est = 1;
+                        if(n_participantes > 1) {
+                            est = 1 + (N - 1) * (puesto - 1) / (n_participantes - 1);
+                        }
+
+                        document.getElementById('panelEstadisticas').style.display = 'block';
+                        document.getElementById('valPosWeb').innerText = `${puesto}º / ${n_participantes}`;
+                        document.getElementById('valPosEst').innerText = `~${Math.round(est)}º`;
+                        document.getElementById('infoParticipacion').innerText = `Basado en ${n_participantes} notas de un total de ${N} aprobados.`;
+                        
+                        // Ocultar el formulario si ya tenemos los datos
+                        document.getElementById('seccionPaso1').style.display = 'none';
+                        document.getElementById('seccionPaso2').style.display = 'none';
+                    }
+                    
+                    row.insertCell(0).innerText = puesto;
+                    row.insertCell(1).innerText = user.dni;
+                    row.insertCell(2).innerText = user.total.toFixed(3);
+                });
+
+                document.getElementById('cargandoRanking').style.display = 'none';
+                document.getElementById('tablaContenedor').style.display = 'table';
+            } catch (e) {
+                document.getElementById('cargandoRanking').innerText = "Introduce tus datos para ver el ranking.";
+            }
+        }
+
+        renderizarRanking();
     </script>
 </body>
 </html>
