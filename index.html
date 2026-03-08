@@ -1,118 +1,224 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ranking OPE</title>
-    <style>
-        body { font-family: sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; background: #f4f7f9; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        button { background: #3498db; color: white; padding: 14px; border: none; border-radius: 6px; width: 100%; cursor: pointer; font-weight: bold; }
-        .stat-box { background: #ebf5fb; padding: 15px; border-radius: 8px; text-align: center; margin: 10px 0; }
-        .stat-val { display: block; font-size: 24px; font-weight: bold; color: #2980b9; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 10px; border-bottom: 1px solid #eee; text-align: center; }
-        .destacado { background-color: #fff9c4 !important; font-weight: bold; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ranking OPE</title>
+
+<style>
+body { font-family: sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; background: #f4f7f9; }
+.card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+button { background: #3498db; color: white; padding: 14px; border: none; border-radius: 6px; width: 100%; cursor: pointer; font-weight: bold; }
+.stat-box { background: #ebf5fb; padding: 15px; border-radius: 8px; text-align: center; margin: 10px 0; }
+.stat-val { display: block; font-size: 24px; font-weight: bold; color: #2980b9; }
+table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+th, td { padding: 10px; border-bottom: 1px solid #eee; text-align: center; }
+.destacado { background-color: #fff9c4 !important; font-weight: bold; }
+</style>
+
 </head>
 <body>
 
-    <h2>📊 Ranking OPE Rehabilitación</h2>
+<h2>📊 Ranking OPE Rehabilitación</h2>
 
-    <div class="card" id="divPaso1">
-        <h3>1. Identificación</h3>
-        <input type="text" id="dni" placeholder="DNI (ej: ***2176**)">
-        <button onclick="buscarDNI()">Verificar mi Nota</button>
-    </div>
+<div class="card" id="divPaso1">
+<h3>1. Identificación</h3>
+<input type="text" id="dni" placeholder="DNI (ej: ***2176**)">
+<button onclick="buscarDNI()">Verificar mi Nota</button>
+</div>
 
-    <div class="card" id="divPaso2" style="display:none;">
-        <div id="bienvenida" style="margin-bottom:15px;"></div>
-        <h3>2. Tu Autobaremo</h3>
-        <input type="number" step="0.001" id="baremo" placeholder="Puntos méritos">
-        <button onclick="enviarDatos()">Calcular mi Puesto</button>
-    </div>
+<div class="card" id="divPaso2" style="display:none;">
+<div id="bienvenida" style="margin-bottom:15px;"></div>
+<h3>2. Tu Autobaremo</h3>
+<input type="number" step="0.001" id="baremo" placeholder="Puntos méritos">
+<button onclick="enviarDatos()">Calcular mi Puesto</button>
+</div>
 
-    <div class="card" id="stats" style="display:none;">
-        <h3>Tu Posición Estimada</h3>
-        <div class="stat-box">
-            <span id="posWeb">Puesto Web: -</span>
-            <span class="stat-val" id="posFinal">~ -º</span>
-            <small id="infoN"></small>
-        </div>
-        <button onclick="localStorage.clear(); location.reload();" style="background:#95a5a6; font-size:11px; padding:5px;">Cerrar sesión / Introducir otro</button>
-    </div>
+<div class="card" id="stats" style="display:none;">
+<h3>Tu Posición Estimada</h3>
+<div class="stat-box">
+<span id="posWeb">Puesto Web: -</span>
+<span class="stat-val" id="posFinal">~ -º</span>
+<small id="infoN"></small>
+</div>
 
-    <div class="card">
-        <h3>Ranking</h3>
-        <div id="msg">Cargando datos...</div>
-        <table id="tabla" style="display:none;">
-            <thead><tr><th>#</th><th>DNI</th><th>Total</th></tr></thead>
-            <tbody id="cuerpo"></tbody>
-        </table>
-    </div>
+<button onclick="cerrarSesion()" style="background:#95a5a6; font-size:11px; padding:5px;">
+Cerrar sesión / Introducir otro
+</button>
 
-    <script>
-        // PEGA AQUÍ TU NUEVA URL DE GOOGLE
-        const URL = "https://script.google.com/macros/s/AKfycbyg3ZdvE_eFkx4TmDl7LO9lf47KZyK_op4ci144s9Hyq0FwbFER85kUtmAa-xM5JB_LYQ/exec";
-        let examen = 0;
+</div>
 
-        async function buscarDNI() {
-            const d = document.getElementById('dni').value.toUpperCase().trim();
-            try {
-                const r = await fetch(`${URL}?dni_buscar=${d}`);
-                const j = await r.json();
-                if(j.success) {
-                    examen = j.notaExamen;
-                    document.getElementById('bienvenida').innerHTML = `Hola <b>${j.nombre}</b>. Tu examen: ${examen}`;
-                    document.getElementById('divPaso1').style.display = 'none';
-                    document.getElementById('divPaso2').style.display = 'block';
-                } else alert("DNI no encontrado.");
-            } catch(e) { alert("Error al buscar."); }
-        }
+<div class="card">
+<h3>Ranking</h3>
 
-        async function enviarDatos() {
-            const b = document.getElementById('baremo').value;
-            const d = document.getElementById('dni').value.toUpperCase().trim();
-            localStorage.setItem('dni_ope', d); // Guardar para recordar al recargar
-            try {
-                await fetch(URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ dni: d, autobaremo: b, examen: examen })});
-                setTimeout(()=> location.reload(), 1000);
-            } catch(e) { alert("Error al guardar."); }
-        }
+<div id="msg">Cargando datos...</div>
 
-        async function cargar() {
-            try {
-                const r = await fetch(URL);
-                const res = await r.json();
-                const lista = res.ranking;
-                const N = res.totalN;
-                const miDni = localStorage.getItem('dni_ope');
-                
-                lista.sort((a,b) => b.total - a.total);
-                
-                const cuerpo = document.getElementById('cuerpo');
-                lista.forEach((u, i) => {
-                    const f = cuerpo.insertRow();
-                    if(u.dni === miDni) {
-                        f.className = 'destacado';
-                        document.getElementById('stats').style.display = 'block';
-                        document.getElementById('posWeb').innerText = `Puesto en Web: ${i+1} de ${lista.length}`;
-                        
-                        // MATEMÁTICAS DE POSICIÓN ESTIMADA
-                        let est = 1 + (N - 1) * (i) / (lista.length - 1 || 1);
-                        document.getElementById('posFinal').innerText = `~${Math.round(est)}º`;
-                        document.getElementById('infoN').innerText = `Basado en el ${Math.round(lista.length/N*100)}% de los aprobados`;
-                    }
-                    f.insertCell(0).innerText = i+1;
-                    f.insertCell(1).innerText = u.dni;
-                    f.insertCell(2).innerText = u.total.toFixed(3);
-                });
-                document.getElementById('msg').style.display = 'none';
-                document.getElementById('tabla').style.display = 'table';
-            } catch(e) { document.getElementById('msg').innerText = "Introduce tu nota para ver el ranking."; }
-        }
-        cargar();
-    </script>
+<table id="tabla" style="display:none;">
+<thead>
+<tr>
+<th>#</th>
+<th>DNI</th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody id="cuerpo"></tbody>
+</table>
+
+</div>
+
+<script>
+
+const URL = "https://script.google.com/macros/s/AKfycbyg3ZdvE_eFkx4TmDl7LO9lf47KZyK_op4ci144s9Hyq0FwbFER85kUtmAa-xM5JB_LYQ/exec";
+
+let examen = 0;
+
+function limpiarDNI(dni){
+return dni.toString().toUpperCase().trim();
+}
+
+function cerrarSesion(){
+localStorage.removeItem('dni_ope');
+location.reload();
+}
+
+async function buscarDNI(){
+
+const d = limpiarDNI(document.getElementById('dni').value);
+
+try{
+
+const r = await fetch(`${URL}?dni_buscar=${d}`);
+const j = await r.json();
+
+if(j.success){
+
+examen = parseFloat(j.notaExamen.toString().replace(",","."));
+
+document.getElementById('bienvenida').innerHTML =
+`Hola <b>${j.nombre}</b>. Tu examen: ${examen}`;
+
+document.getElementById('divPaso1').style.display = 'none';
+document.getElementById('divPaso2').style.display = 'block';
+
+document.getElementById('dni').value = d;
+
+}else{
+
+alert("DNI no encontrado.");
+
+}
+
+}catch(e){
+
+alert("Error al buscar.");
+
+}
+
+}
+
+async function enviarDatos(){
+
+const b = parseFloat(document.getElementById('baremo').value);
+const d = limpiarDNI(document.getElementById('dni').value);
+
+localStorage.setItem('dni_ope', d);
+
+try{
+
+await fetch(URL,{
+method:'POST',
+mode:'no-cors',
+body: JSON.stringify({
+dni:d,
+autobaremo:b,
+examen:examen
+})
+});
+
+setTimeout(()=>location.reload(),1200);
+
+}catch(e){
+
+alert("Error al guardar.");
+
+}
+
+}
+
+async function cargar(){
+
+try{
+
+const r = await fetch(URL);
+const res = await r.json();
+
+const lista = res.ranking;
+const N = res.totalN;
+
+const miDni = limpiarDNI(localStorage.getItem('dni_ope') || "");
+
+lista.sort((a,b)=>b.total-a.total);
+
+const cuerpo = document.getElementById('cuerpo');
+
+lista.forEach((u,i)=>{
+
+const f = cuerpo.insertRow();
+
+const dniLista = limpiarDNI(u.dni);
+
+if(dniLista === miDni){
+
+f.className = 'destacado';
+
+document.getElementById('stats').style.display = 'block';
+
+document.getElementById('posWeb').innerText =
+`Puesto Web: ${i+1} de ${lista.length}`;
+
+let est;
+
+if(lista.length>1){
+
+est = 1 + (N-1)*(i)/(lista.length-1);
+
+}else{
+
+est = Math.round(N/2);
+
+}
+
+document.getElementById('posFinal').innerText =
+`~${Math.round(est)}º`;
+
+document.getElementById('infoN').innerText =
+`Basado en el ${Math.round(lista.length/N*100)}% de los aprobados`;
+
+}
+
+f.insertCell(0).innerText = i+1;
+f.insertCell(1).innerText = u.dni;
+f.insertCell(2).innerText = u.total.toFixed(3);
+
+});
+
+document.getElementById('msg').style.display='none';
+document.getElementById('tabla').style.display='table';
+
+}catch(e){
+
+document.getElementById('msg').innerText =
+"Introduce tu nota para ver el ranking.";
+
+}
+
+}
+
+cargar();
+
+</script>
+
 </body>
 </html>
+
